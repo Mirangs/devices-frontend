@@ -39,15 +39,40 @@ export const projectsSlice = createSlice({
     setError: (state: InitialState, action: PayloadAction<string>) => {
       state.error = action.payload
     },
+    deleteProject: (state: InitialState, action: PayloadAction<number>) => {
+      state.projects = state.projects.filter(({ id }) => id !== action.payload)
+    },
+    editProjectName: (
+      state: InitialState,
+      action: PayloadAction<{ id: number; title: string }>
+    ) => {
+      state.projects = state.projects.map((project) => {
+        if (project.id === action.payload.id) {
+          return {
+            ...project,
+            title: action.payload.title,
+          }
+        }
+
+        return project
+      })
+    },
   },
 })
 
-export const { setProjects, setIsLoading, setError } = projectsSlice.actions
+export const {
+  setProjects,
+  setIsLoading,
+  setError,
+  deleteProject,
+  editProjectName,
+} = projectsSlice.actions
 
 export const fetchProjects = (): AppThunk => async (dispatch) => {
   dispatch(setIsLoading(true))
   try {
-    const res = await fetch('http://localhost:3001/projects')
+    const BASE_URL = process.env.REACT_APP_DEVICES_API
+    const res = await fetch(`${BASE_URL}/projects`)
     const json = await res.json()
     dispatch(setProjects(json))
   } catch (e) {
